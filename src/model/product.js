@@ -34,6 +34,8 @@ const productSchema = new mongoose.Schema({
         required: true,
         ref: 'seller'
     }
+}, {
+    timestamps: true
 })
 
 

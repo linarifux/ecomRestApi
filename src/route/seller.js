@@ -1,6 +1,7 @@
 const express = require('express')
 const Seller = require('../model/seller')
 const auth = require('../middleware/auth')
+const multer = require('multer')
 
 const router = express.Router()
 
@@ -72,6 +73,45 @@ router.get('/api/sellers/me',auth, async (req,res) => {
     }catch(e){
         res.status(400).send(e)
     }
+})
+
+
+// Deleting a seller profile 
+router.delete('/api/sellers', auth, async (req,res) => {
+    try{
+        const seller = req.seller
+        await seller.remove()
+        res.status(200).send(seller)
+    }catch(e){
+        res.status(400).send(e)
+    }
+})
+
+// uploading seller DP
+const avatar = multer({
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req,file,cb){
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+            return cb(new Error('Please, upload an image'))
+        }
+        cb(undefined, true)
+    }
+})
+router.post('/sellers/me/avatar', auth, avatar.single('avatars'), async (req,res) => {
+    req.seller.avatar = req.file.buffer
+    await req.seller.save()
+    res.send()
+}, (err,req,res,next) => {
+    res.status(400).send({error: err.message})
+})
+
+// delete user avatar
+router.delete('/sellers/me/avatar', auth, async (req,res) => {
+    req.seller.avatar = undefined
+    await req.seller.save()
+    res.send()
 })
 
 // all sellers

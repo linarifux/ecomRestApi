@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Product = require('../model/product')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -38,14 +39,20 @@ const sellerSchema = new mongoose.Schema({
             type: String,
             required: true
         }
-    }]
+    }],
+    avatar: {
+        type: Buffer
+    }
+}, {
+    timestamps: true
 })
 
-// products virtual field
+
+// virtual property
 sellerSchema.virtual('products', {
     ref: 'product',
     localField: '_id',
-    foreignField: 'owner'
+    foreignField:'owner'
 })
 
 
@@ -55,6 +62,13 @@ sellerSchema.pre('save', async function(next){
     if(user.isModified('password')){
         user.password = await bcrypt.hash(user.password, 8)
     }
+    next()
+})
+
+// Deleting seller with products
+sellerSchema.pre('remove', async function(next){
+    const seller = this
+    await Product.deleteMany({owner: seller._id})
     next()
 })
 
