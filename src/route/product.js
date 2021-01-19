@@ -100,7 +100,7 @@ router.delete('/api/myproducts/:id', auth, async (req,res) => {
 // all the products
 router.get('/api/products', async (req,res) => {
     try{
-        const products = await Product.find({})
+        const products = await Product.find({}).populate('owner')
         if(products.length === 0){
             return res.status(404).send('No products found!')
         }
@@ -109,6 +109,18 @@ router.get('/api/products', async (req,res) => {
         res.status(400).send(e)
     }
 })
+
+// // products with seller
+// router.get('/api/pro', async (req,res) => {
+//     try{
+//         const products = await Product.find().populate('owner')
+//         res.send(products)
+//     }catch(e){
+//         res.status(400).send(e)
+//     }
+// })
+
+
 
 
 
